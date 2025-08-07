@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Basket Laundry | Modern Laundry. Minimal Impact.</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script>
+    window.addEventListener('scroll', function () {
+      const header = document.querySelector('header');
+      header.classList.toggle('py-6', window.scrollY < 50);
+      header.classList.toggle('py-2', window.scrollY >= 50);
+    });
+  </script>
+</head>
+<body class="bg-white text-gray-800 font-sans">
+  <header class="bg-white text-gray-800 py-6 shadow fixed w-full top-0 z-50 transition-all duration-300">
+    <div class="container mx-auto flex justify-between items-center px-4">
+      <div class="flex items-center space-x-2">
+        <img src="/images/green-basket-logo.png" alt="Green Basket Laundry Logo" class="h-20 w-30" />
+      </div>
+      <nav class="space-x-4">
+        <a href="#about" class="hover:underline">About</a>
+        <a href="#investors" class="hover:underline">Investors</a>
+        <a href="#blog" class="hover:underline">Blog</a>
+        <a href="#contact" class="hover:underline">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="pt-28">
+    <section class="bg-gray-100 py-16 text-center">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold mb-4">Modern Laundry. Minimal Impact.</h2>
+        <p class="text-xl mb-6">Welcome to the future of clean. At Green Basket Laundry, we're turning outdated laundromats into sustainable, high-efficiency service hubs.</p>
+        <a href="#investors" class="bg-green-700 text-white px-6 py-3 rounded hover:bg-green-800">Learn More</a>
+      </div>
+    </section>
+
+    <section class="py-16">
+      <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-3 gap-8 text-center">
+          <div>
+            <img src="/images/coin.jpg" alt="Cashless Laundry" class="w-full h-40 object-cover rounded mb-4" />
+            <h3 class="text-xl font-semibold mb-2">💳 Cashless Experience</h3>
+            <p>Modern machines with digital payment options and no coins required.</p>
+          </div>
+          <div>
+            <img src="/images/fold.png" alt="Wash and Fold" class="w-full h-40 object-cover rounded mb-4" />
+            <h3 class="text-xl font-semibold mb-2">🧺 Wash & Fold Services</h3>
+            <p>Time-saving, premium laundry service with top-tier quality control.</p>
+          </div>
+          <div>
+            <img src="/images/eco.png" alt="Eco-Friendly Equipment" class="w-full h-40 object-cover rounded mb-4" />
+            <h3 class="text-xl font-semibold mb-2">🌱 Eco-Efficient Equipment</h3>
+            <p>ENERGY STAR machines reduce water and electricity usage significantly.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="bg-white py-16">
+      <div class="container mx-auto px-4 max-w-4xl text-center">
+        <h2 class="text-3xl font-bold mb-4">About Green Basket Laundry</h2>
+        <p class="mb-4">We're not just doing laundry — we're reinventing it. Green Basket Laundry is a modern take on your neighborhood laundromat: smart, cashless, and green. With each location, we reduce utility usage, increase service quality, and raise the standard for cleanliness and community support.</p>
+        <p class="mb-4">Our founding team is made up of professional investors, seasoned entrepreneurs, environmental advocates, and tech wizards — all coming together to transform a forgotten industry. While traditional private equity has overlooked laundromats, we see the massive potential for impact and scale. With the right technology and vision, Green Basket Laundry is positioned to become a major disruptive force in clean living and neighborhood services.</p>
+        <p>Founded in 2025, we're building a national brand powered by sustainable operations and smart technology. From AI monitoring to modern design, we're elevating the everyday experience for customers and delivering clean returns for investors.</p>
+      </div>
+    </section>
+
+    <section id="investors" class="bg-gray-100 py-16 text-center">
+      <div class="container mx-auto px-4 max-w-4xl">
+        <h2 class="text-3xl font-bold mb-4">Investor Relations</h2>
+        <p class="mb-6">Green Basket Laundry is actively acquiring and modernizing laundromats in high-growth markets. Our model delivers 30–45% EBITDA margins, driven by cashless payments, energy savings, and high-margin wash & fold services.</p>
+        <p class="mb-4">With accelerated depreciation and green incentives, our model offers attractive, nearly tax-free returns. Download our prospectus or reach out to learn more.</p>
+        <a href="#contact" class="bg-green-700 text-white px-6 py-3 rounded hover:bg-green-800">Contact Our Investor Team</a>
+      </div>
+    </section>
+
+    <section id="blog" class="py-16">
+      <div class="container mx-auto px-4 max-w-5xl">
+        <h2 class="text-3xl font-bold mb-6 text-center">Insights from the Laundry Room</h2>
+        <div class="space-y-6">
+          <div class="bg-white rounded shadow p-6">
+            <h3 class="text-xl font-semibold mb-2">Laundry and the Circular Economy</h3>
+            <p class="text-sm text-gray-600">Posted by Green Basket Staff | Aug 2025</p>
+            <p class="mt-4">Laundry plays a surprisingly significant role in resource consumption...</p>
+          </div>
+          <div class="bg-white rounded shadow p-6">
+            <h3 class="text-xl font-semibold mb-2">The Hidden Environmental Cost of Old Laundromats</h3>
+            <p class="text-sm text-gray-600">Posted by Green Basket Staff | Aug 2025</p>
+            <p class="mt-4">Many legacy laundromats still rely on machines that are 20+ years old...</p>
+          </div>
+          <div class="bg-white rounded shadow p-6">
+            <h3 class="text-xl font-semibold mb-2">Environmental Impact at Scale</h3>
+            <p class="text-sm text-gray-600">Posted by Green Basket Staff | Aug 2025</p>
+            <p class="mt-4">By upgrading just one laundromat, Green Basket saves an average of...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="bg-white py-16">
+      <div class="container mx-auto px-4 max-w-2xl">
+        <h2 class="text-3xl font-bold mb-4 text-center">Get in Touch</h2>
+        <form class="space-y-4">
+          <input type="text" placeholder="Your Name" class="w-full border rounded p-3" required />
+          <input type="email" placeholder="Your Email" class="w-full border rounded p-3" required />
+          <textarea placeholder="Your Message" rows="5" class="w-full border rounded p-3" required></textarea>
+          <button type="submit" class="bg-green-700 text-white px-6 py-3 rounded hover:bg-green-800">Send Message</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-gray-100 py-6 text-center text-sm mt-16">
+    <p>&copy; 2025 Green Basket Laundry. All rights reserved. | <a href="mailto:info@greenbasketlaundry.com" class="text-green-700 underline">info@greenbasketlaundry.com</a></p>
+  </footer>
+</body>
+</html>
