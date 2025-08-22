@@ -83,26 +83,42 @@
       </div>
     </section>
 
-    <!-- BLOG -->
-<section id="blog" class="py-16">
-  <div class="container mx-auto px-4 max-w-5xl">
+<!-- BLOG -->
+<section id="blog" class="py-16 anchor-offset">
+  <div class="container mx-auto px-4 max-w-3xl">
     <h2 class="text-3xl font-bold mb-8 text-center">Latest from the Blog</h2>
-    <!-- Cards render here -->
-    <div id="blog-cards" class="sflex flex-col gap-5"></div>
+    <div id="blog-cards" class="flex flex-col gap-5"><!-- cards render here --></div>
   </div>
 </section>
+
+<style>
+  /* Force vertical stack even if older .blog-grid CSS exists */
+  #blog-cards { display:flex; flex-direction:column; gap:1.25rem; }
+</style>
 
 <script>
 (async () => {
   try {
-    const res = await fetch('public/posts.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('posts.json not found');
-    const { posts = [] } = await res.json();
-    posts.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+    // Try both possible JSON locations
+    const paths = ['/posts.json', 'posts.json', '/public/posts.json', 'public/posts.json'];
+    let data = null, lastErr = null;
+
+    for (const p of paths) {
+      try {
+        const r = await fetch(p, { cache: 'no-store' });
+        if (r.ok) { data = await r.json(); break; }
+        lastErr = `HTTP ${r.status} @ ${p}`;
+      } catch (e) { lastErr = String(e); }
+    }
+    if (!data) throw new Error(lastErr || 'posts.json not found');
+
+    const posts = (data.posts || []).slice(); // copy
+    // newest → oldest (extra safety)
+    posts.sort((a,b) => new Date(b.publishedAt||0) - new Date(a.publishedAt||0));
 
     const fmtDate = (v) => {
       if (!v) return '';
-      const n = typeof v === 'number' ? v : (/^\d+$/.test(String(v)) ? Number(v) : v);
+      const n = /^\d+$/.test(String(v)) ? Number(v) : v;
       const d = new Date(n);
       return isNaN(d) ? '' : d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
     };
@@ -111,21 +127,20 @@
       const date = fmtDate(p.publishedAt);
       const authors = (p.authorNames && p.authorNames.length) ? p.authorNames.join(', ') : '';
       const meta = [date, authors].filter(Boolean).join(' · ');
-      const img = p.featuredImage
-        ? `<a href="${p.url}" target="_blank" rel="noopener" class="block shrink-0">
-             <img src="${p.featuredImage}" alt="${(p.title||'Post').replace(/"/g,'&quot;')}"
-                  class="w-full h-44 sm:w-44 sm:h-28 object-cover rounded-md" loading="lazy">
-           </a>`
-        : '';
 
       return `
         <article class="post-card flex flex-col sm:flex-row items-start gap-4 p-4 border border-gray-200 rounded-2xl bg-white shadow-sm">
-          ${img}
+          ${p.featuredImage ? `
+            <a href="${p.url}" target="_blank" rel="noopener" class="block shrink-0">
+              <img src="${p.featuredImage}" alt=""
+                   class="w-40 h-28 object-cover rounded-md" loading="lazy">
+            </a>
+          ` : ''}
           <div class="flex-1">
             <h3 class="leading-tight mb-1">
               <a href="${p.url}" target="_blank" rel="noopener"
                  class="text-2xl font-extrabold text-green-800 hover:underline">
-                 ${p.title || 'Untitled'}
+                ${p.title || 'Untitled'}
               </a>
             </h3>
             ${meta ? `<p class="text-sm text-gray-500 mb-1">${meta}</p>` : ''}
@@ -137,147 +152,14 @@
     document.getElementById('blog-cards').innerHTML =
       html || '<p class="text-center text-gray-500">No posts yet.</p>';
   } catch (e) {
-    console.error('Failed to load posts:', e);
+    console.error('Blog load error:', e);
     document.getElementById('blog-cards').innerHTML =
       '<p class="text-center text-red-600">Could not load posts.</p>';
   }
 })();
 </script>
-
-<!--<section id="blog" class="py-16">
-  <section id="blog-cards" class="blog-grid"></section>
-</section>
-
-<style>
-.blog-grid { display:grid; gap:1.25rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
-.post-card { border:1px solid #eee; border-radius:14px; overflow:hidden; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-.post-card img { width:100%; height:160px; object-fit:cover; display:block; } /* ↓ shrink image */
-.post-card h3 { margin:12px 16px 6px; }
-.post-card h3 a { font-size:1.125rem; line-height:1.3; font-weight:700; color:#0f5132; text-decoration:none; } /* ↑ bigger link */
-.post-card h3 a:hover { text-decoration:underline; }
-.meta { color:#6b7280; font-size:.875rem; margin:0 16px 16px; }
-</style>
-
-<script>
-(async () => {
-  try {
-    const res = await fetch('public/posts.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('posts.json not found');
-    const { posts = [] } = await res.json();
-
-    const fmtDate = (v) => {
-      if (!v) return '';
-      const n = typeof v === 'number' ? v : (/^\d+$/.test(String(v)) ? Number(v) : v);
-      const d = new Date(n);
-      return isNaN(d) ? '' : d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
-    };
-
-    const html = posts.map(p => {
-      const date = fmtDate(p.publishedAt);
-      return `
-        <article class="post-card">
-          ${p.featuredImage ? `<img src="${p.featuredImage}" alt="" loading="lazy">` : ''}
-          <h3><a href="${p.url}" target="_blank" rel="noopener">${p.title || 'Untitled'}</a></h3>
-          ${(date || (p.authorNames?.length ?? 0)) ? `<p class="meta">
-            ${date ? date : ''}${date && p.authorNames?.length ? ' · ' : ''}${p.authorNames?.join(', ') || ''}
-          </p>` : ''}
-        </article>
-      `;
-    }).join('');
-
-    document.getElementById('blog-cards').innerHTML = html || '<p class="text-center text-gray-500">No posts yet.</p>';
-  } catch (e) {
-    console.error('Failed to load posts:', e);
-    document.getElementById('blog-cards').innerHTML = '<p class="text-center text-red-600">Could not load posts.</p>';
-  }
-})();
-</script>
-
-    <!--<section id="blog" class="py-16">
-      <section id="blog-cards" class="blog-grid"></section>
-<script>
-(async () => {
-  try {
-    const res = await fetch('public/posts.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('posts.json not found');
-    const { posts = [] } = await res.json();
-
-    const fmtDate = (v) => {
-      if (!v) return '';
-      const n = typeof v === 'number' ? v : (/^\d+$/.test(String(v)) ? Number(v) : v);
-      const d = new Date(n);
-      return isNaN(d) ? '' : d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
-    };
-
-    const html = posts.map(p => {
-      const date = fmtDate(p.publishedAt);
-      return `
-        <article class="post-card">
-          ${p.featuredImage ? `<img src="${p.featuredImage}" alt="" loading="lazy">` : ''}
-          <h3>${p.url ? `<a href="${p.url}">${p.title || 'Untitled'}</a>` : (p.title || 'Untitled')}</h3>
-          ${date || (p.authorNames?.length ?? 0) ? `
-            <p class="meta">
-              ${date ? date : ''}${date && p.authorNames?.length ? ' · ' : ''}${p.authorNames?.join(', ') || ''}
-            </p>` : ''
-          }
-        </article>
-      `;
-    }).join('');
-
-    document.getElementById('blog-cards').innerHTML = html || '<p class="text-center text-gray-500">No posts yet.</p>';
-  } catch (e) {
-    console.error('Failed to load posts:', e);
-    document.getElementById('blog-cards').innerHTML = '<p class="text-center text-red-600">Could not load posts.</p>';
-  }
-})();
-</script>
-
-      <!--<script>
-(async () => {
-  try {
-    const res = await fetch('public/posts.json');  // built at publish time by the Action
-    const { posts } = await res.json();
-    const fmt = d => new Date(d).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
-    document.getElementById('blog-cards').innerHTML = posts.map(p => `
-      <article class="post-card">
-        ${p.featuredImage ? `<img src="${p.featuredImage}" alt="" loading="lazy">` : ''}
-        <h3><a href="${p.url}">${p.title}</a></h3>
-        <p class="meta">${fmt(p.publishedAt)}${p.authorNames?.length ? ` · ${p.authorNames.join(', ')}` : ''}</p>
-      </article>
-    `).join('');
-  } catch (e) {
-    console.error('Failed to load posts.json', e);
-  }
-})();
-</script>-->
-
-<!--<style>
-.blog-grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
-.post-card { border:1px solid #eee; border-radius:12px; padding:12px; }
-.post-card img { width:100%; height:auto; border-radius:10px; display:block; }
-.post-card h3 { margin:10px 0 6px; font-size:1.05rem; }
-.meta { color:#666; font-size:.9rem; margin:0; }
-</style>-->
-      <!--<div class="container mx-auto px-4 max-w-5xl">
-        <h2 class="text-3xl font-bold mb-6 text-center">Insights from the Laundry Room</h2>
-        <div class="space-y-6">
-          <div class="bg-white rounded shadow p-6">
-            <h3 class="text-xl font-semibold mb-2">Laundry and the Circular Economy</h3>
-            <p class="text-sm text-gray-600">Posted by Green Basket Staff | Aug 2025</p>
-            <p class="mt-4">Laundry plays a surprisingly significant role in resource consumption...</p>
-          </div>
-          <div class="bg-white rounded shadow p-6">
-            <h3 class="text-xl font-semibold mb-2">The Hidden Environmental Cost of Old Laundromats</h3>
-            <p class="text-sm text-gray-600">Posted by Green Basket Staff | Aug 2025</p>
-            <p class="mt-4">Many legacy laundromats still rely on machines that are 20+ years old...</p>
-          </div>
-          <div class="bg-white rounded shadow p-6">
-            <h3 class="text-xl font-semibold mb-2">Environmental Impact at Scale</h3>
-            <p class="text-sm text-gray-600">Posted by Green Basket Staff | Aug 2025</p>
-            <p class="mt-4">By upgrading just one laundromat, Green Basket saves an average of...</p>
-          </div>
-        </div>
-      </div>-->
+    
+ 
     </section>
 
     <section id="contact" class="bg-white py-16">
