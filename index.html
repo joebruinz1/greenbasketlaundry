@@ -85,6 +85,43 @@
 <script>
 (async () => {
   try {
+    const res = await fetch('public/posts.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('posts.json not found');
+    const { posts = [] } = await res.json();
+
+    const fmtDate = (v) => {
+      if (!v) return '';
+      const n = typeof v === 'number' ? v : (/^\d+$/.test(String(v)) ? Number(v) : v);
+      const d = new Date(n);
+      return isNaN(d) ? '' : d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+    };
+
+    const html = posts.map(p => {
+      const date = fmtDate(p.publishedAt);
+      return `
+        <article class="post-card">
+          ${p.featuredImage ? `<img src="${p.featuredImage}" alt="" loading="lazy">` : ''}
+          <h3>${p.url ? `<a href="${p.url}">${p.title || 'Untitled'}</a>` : (p.title || 'Untitled')}</h3>
+          ${date || (p.authorNames?.length ?? 0) ? `
+            <p class="meta">
+              ${date ? date : ''}${date && p.authorNames?.length ? ' · ' : ''}${p.authorNames?.join(', ') || ''}
+            </p>` : ''
+          }
+        </article>
+      `;
+    }).join('');
+
+    document.getElementById('blog-cards').innerHTML = html || '<p class="text-center text-gray-500">No posts yet.</p>';
+  } catch (e) {
+    console.error('Failed to load posts:', e);
+    document.getElementById('blog-cards').innerHTML = '<p class="text-center text-red-600">Could not load posts.</p>';
+  }
+})();
+</script>
+
+      <!--<script>
+(async () => {
+  try {
     const res = await fetch('public/posts.json');  // built at publish time by the Action
     const { posts } = await res.json();
     const fmt = d => new Date(d).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
@@ -99,7 +136,7 @@
     console.error('Failed to load posts.json', e);
   }
 })();
-</script>
+</script>-->
 
 <style>
 .blog-grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
