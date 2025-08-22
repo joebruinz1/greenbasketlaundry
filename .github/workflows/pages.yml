@@ -21,17 +21,29 @@ jobs:
         with:
           node-version: 20
 
-      - name: Fetch HubSpot posts -> public/posts.json
-        env:
-          HUBSPOT_PRIVATE_APP_TOKEN: ${{ secrets.HUBSPOT_PRIVATE_APP_TOKEN }}
-          BLOG_BASE: https://hubspot.greenbasketlaundry.com
-          HS_LIMIT: '6'
-        run: |
-          node scripts/fetch_hubspot.mjs || {
-            echo "Fetch failed, writing empty posts.json so the site still deploys"
-            mkdir -p public
-            echo '{"count":0,"posts":[]}' > public/posts.json
-          }
+      - name: Fetch HubSpot posts -> public/posts.json (robust)
+  env:
+    HUBSPOT_PRIVATE_APP_TOKEN: ${{ secrets.HUBSPOT_PRIVATE_APP_TOKEN }}
+    BLOG_BASE: https://hubspot.greenbasketlaundry.com
+    HS_LIMIT: '6'
+  run: |
+    set -Eeuo pipefail
+    mkdir -p public
+    # Try to build posts.json; if it fails (bad token, 401, etc), create an empty one
+    node scripts/fetch_hubspot.mjs || {
+      echo "Fetch failed; writing empty JSON so the site still deploys"
+      echo '{"count":0,"posts":[]}' > public/posts.json
+    }
+    # Also place a copy at the site root so either URL works
+    cp public/posts.json posts.json || true
+
+    echo "---- DEBUG: file listing ----"
+    ls -la
+    echo "---- DEBUG: public/ ----"
+    ls -la public || true
+    echo "---- DEBUG: posts.json head ----"
+    head -c 400 public/posts.json || true
+
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
