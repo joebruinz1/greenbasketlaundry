@@ -1,16 +1,16 @@
 // scripts/fetch_hubspot.mjs
-// Fetch latest HubSpot blog posts and write a trimmed JSON for the site.
+// Fetch latest HubSpot blog posts and write a trimmed JSON the site can read.
 
 import fs from 'node:fs/promises';
 
-// --- Config (from env) ---
+// ── Config (env) ───────────────────────────────────────────────────────────────
 const TOKEN = process.env.HUBSPOT_PRIVATE_APP_TOKEN;
 if (!TOKEN) throw new Error("Missing HUBSPOT_PRIVATE_APP_TOKEN");
 
 const BLOG_BASE = (process.env.BLOG_BASE || 'https://hubspot.greenbasketlaundry.com').replace(/\/$/, '');
 const LIMIT = process.env.HS_LIMIT || '6';
 
-// --- Call HubSpot API ---
+// ── Call HubSpot API ───────────────────────────────────────────────────────────
 const apiUrl = new URL('https://api.hubapi.com/cms/v3/blogs/posts');
 apiUrl.searchParams.set('limit', LIMIT);
 apiUrl.searchParams.set('state', 'PUBLISHED');
@@ -25,7 +25,7 @@ if (!resp.ok) {
 }
 const raw = await resp.json();
 
-// --- Helpers ---
+// ── Helpers ───────────────────────────────────────────────────────────────────
 const toIso = (v) => {
   if (!v) return null;
   const n = typeof v === 'number' ? v : (/^\d+$/.test(String(v)) ? Number(v) : NaN);
@@ -36,10 +36,8 @@ const toIso = (v) => {
 const normalize = (p) => {
   const title = p.title || p.htmlTitle || p.pageTitle || p.name || p.slug || 'Untitled';
 
-  // Prefer absolute URL from API (already correct if a custom domain is connected)
+  // Prefer absolute URL coming from HubSpot. Fallback to BLOG_BASE + blogSlug + slug.
   const absoluteFromApi = p.url || p.absoluteUrl || p.postUrl || null;
-
-  // Fallback to your domain + blog slug + post slug
   const blogPrefix = p.blogSlug ? `/${String(p.blogSlug).replace(/^\/|\/$/g,'')}` : '';
   const slugPath   = p.slug ? `${blogPrefix}/${p.slug}` : '';
   const fallbackUrl = slugPath ? `${BLOG_BASE}${slugPath}` : null;
@@ -55,7 +53,7 @@ const normalize = (p) => {
     id: p.id,
     title,
     slug: p.slug || '',
-    url: absoluteFromApi || fallbackUrl,   // → e.g., https://hubspot.greenbasketlaundry.com/green-basket-blog/<slug>
+    url: absoluteFromApi || fallbackUrl,   // e.g. https://hubspot.greenbasketlaundry.com/green-basket-blog/<slug>
     featuredImage,
     tagIds: p.tagIds || p.tagList || [],
     publishedAt: toIso(p.publishedAt) || toIso(p.publishDate) || toIso(p.updatedAt) || toIso(p.createdAt),
@@ -63,10 +61,16 @@ const normalize = (p) => {
   };
 };
 
-// --- Map + write file ---
-const posts = (raw.results || []).map(normalize);
+// ── Map, sort newest→oldest, write files ──────────────────────────────────────
+const posts = (raw.results || []).map(normalize).sort(
+  (a,b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0)
+);
 
 await fs.mkdir('public', { recursive: true });
-await fs.writeFile('public/posts.json', JSON.stringify({ count: posts.length, posts }, null, 2));
+const payload = JSON.stringify({ count: posts.length, posts }, null, 2);
 
-console.log(`Wrote public/posts.json with ${posts.length} posts`);
+// Write to BOTH locations so the page can load either path.
+await fs.writeFile('public/posts.json', payload);
+await fs.writeFile('posts.json', payload);
+
+console.log(`Wrote posts.json (x2) with ${posts.length} posts`);
