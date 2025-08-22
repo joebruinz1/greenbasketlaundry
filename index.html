@@ -81,7 +81,34 @@
     </section>
 
     <section id="blog" class="py-16">
-      <div class="container mx-auto px-4 max-w-5xl">
+      <section id="blog-cards" class="blog-grid"></section>
+<script>
+(async () => {
+  try {
+    const res = await fetch('/posts.json');  // built at publish time by the Action
+    const { posts } = await res.json();
+    const fmt = d => new Date(d).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+    document.getElementById('blog-cards').innerHTML = posts.map(p => `
+      <article class="post-card">
+        ${p.featuredImage ? `<img src="${p.featuredImage}" alt="" loading="lazy">` : ''}
+        <h3><a href="${p.url}">${p.title}</a></h3>
+        <p class="meta">${fmt(p.publishedAt)}${p.authorNames?.length ? ` · ${p.authorNames.join(', ')}` : ''}</p>
+      </article>
+    `).join('');
+  } catch (e) {
+    console.error('Failed to load posts.json', e);
+  }
+})();
+</script>
+
+<style>
+.blog-grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+.post-card { border:1px solid #eee; border-radius:12px; padding:12px; }
+.post-card img { width:100%; height:auto; border-radius:10px; display:block; }
+.post-card h3 { margin:10px 0 6px; font-size:1.05rem; }
+.meta { color:#666; font-size:.9rem; margin:0; }
+</style>
+      <!--<div class="container mx-auto px-4 max-w-5xl">
         <h2 class="text-3xl font-bold mb-6 text-center">Insights from the Laundry Room</h2>
         <div class="space-y-6">
           <div class="bg-white rounded shadow p-6">
@@ -100,7 +127,7 @@
             <p class="mt-4">By upgrading just one laundromat, Green Basket saves an average of...</p>
           </div>
         </div>
-      </div>
+      </div>-->
     </section>
 
     <section id="contact" class="bg-white py-16">
