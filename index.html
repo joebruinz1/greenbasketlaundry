@@ -88,7 +88,7 @@
   <div class="container mx-auto px-4 max-w-5xl">
     <h2 class="text-3xl font-bold mb-8 text-center">Latest from the Blog</h2>
     <!-- Cards render here -->
-    <div id="blog-cards" class="space-y-4"></div>
+    <div id="blog-cards" class="sflex flex-col gap-5"></div>
   </div>
 </section>
 
@@ -98,6 +98,7 @@
     const res = await fetch('public/posts.json', { cache: 'no-store' });
     if (!res.ok) throw new Error('posts.json not found');
     const { posts = [] } = await res.json();
+    posts.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
 
     const fmtDate = (v) => {
       if (!v) return '';
