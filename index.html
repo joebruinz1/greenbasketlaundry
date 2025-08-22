@@ -80,7 +80,67 @@
       </div>
     </section>
 
+    <!-- BLOG -->
 <section id="blog" class="py-16">
+  <div class="container mx-auto px-4 max-w-5xl">
+    <h2 class="text-3xl font-bold mb-8 text-center">Latest from the Blog</h2>
+    <!-- Cards render here -->
+    <div id="blog-cards" class="space-y-4"></div>
+  </div>
+</section>
+
+<script>
+(async () => {
+  try {
+    const res = await fetch('public/posts.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('posts.json not found');
+    const { posts = [] } = await res.json();
+
+    const fmtDate = (v) => {
+      if (!v) return '';
+      const n = typeof v === 'number' ? v : (/^\d+$/.test(String(v)) ? Number(v) : v);
+      const d = new Date(n);
+      return isNaN(d) ? '' : d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+    };
+
+    const html = posts.map(p => {
+      const date = fmtDate(p.publishedAt);
+      const authors = (p.authorNames && p.authorNames.length) ? p.authorNames.join(', ') : '';
+      const meta = [date, authors].filter(Boolean).join(' · ');
+      const img = p.featuredImage
+        ? `<a href="${p.url}" target="_blank" rel="noopener" class="block shrink-0">
+             <img src="${p.featuredImage}" alt="${(p.title||'Post').replace(/"/g,'&quot;')}"
+                  class="w-full h-44 sm:w-44 sm:h-28 object-cover rounded-md" loading="lazy">
+           </a>`
+        : '';
+
+      return `
+        <article class="post-card flex flex-col sm:flex-row items-start gap-4 p-4 border border-gray-200 rounded-2xl bg-white shadow-sm">
+          ${img}
+          <div class="flex-1">
+            <h3 class="leading-tight mb-1">
+              <a href="${p.url}" target="_blank" rel="noopener"
+                 class="text-2xl font-extrabold text-green-800 hover:underline">
+                 ${p.title || 'Untitled'}
+              </a>
+            </h3>
+            ${meta ? `<p class="text-sm text-gray-500 mb-1">${meta}</p>` : ''}
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    document.getElementById('blog-cards').innerHTML =
+      html || '<p class="text-center text-gray-500">No posts yet.</p>';
+  } catch (e) {
+    console.error('Failed to load posts:', e);
+    document.getElementById('blog-cards').innerHTML =
+      '<p class="text-center text-red-600">Could not load posts.</p>';
+  }
+})();
+</script>
+
+<!--<section id="blog" class="py-16">
   <section id="blog-cards" class="blog-grid"></section>
 </section>
 
